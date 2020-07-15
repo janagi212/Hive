@@ -4,9 +4,7 @@
 Solution
 -------------
 select dname,cid,revenue,rank() over(partition by dname order by revenue desc) rnk from(
-select d.department_name dname,c.category_id cid ,sum(oi.order_item
-
-_subtotal) revenue
+select d.department_name dname,c.category_id cid ,sum(oi.order_item_subtotal) revenue
 from order_item oi join products p on oi.order_item_product_id=p.product_id
 join categories c on p.product_category_id=c.category_id
 join departments d on c.category_department_id = d.department_id

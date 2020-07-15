@@ -1,0 +1,36 @@
+Exercise 1
+============
+# Calculate Min,Max,Avg of Order_item_product_price
+
+DESCRIBE ORDER_ITEM;
+order_item_id           int                                         
+order_item_order_id     int                                         
+order_item_product_id   int                                         
+order_item_quantity     int                                         
+order_item_subtotal     float                                       
+order_item_product_price        float                                       
+Time taken: 0.648 seconds, Fetched: 6 row(s)
+
+Solution
+----------
+
+select min(order_item_product_price),max(order_item_product_price),avg(order_item_product_price) from order_item;
+
+
+Exercise 2
+===========
+# Create  a table with following structure
+
+r_regionkey             int                                         
+r_name                  string                                      
+r_comment               string                                      
+r_nations               array<struct<n_nationkey:int,n_name:string,n_comment:string>>  
+
+Load data into the table
+
+
+Solution
+--------
+
+
+

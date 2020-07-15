@@ -1,0 +1,81 @@
+Exercise 1
+============
+# Calculate Min,Max,Avg of Order_item_product_price
+
+DESCRIBE ORDER_ITEM;
+order_item_id           int                                         
+order_item_order_id     int                                         
+order_item_product_id   int                                         
+order_item_quantity     int                                         
+order_item_subtotal     float                                       
+order_item_product_price        float                                       
+Time taken: 0.648 seconds, Fetched: 6 row(s)
+
+Solution
+----------
+
+select min(order_item_product_price),max(order_item_product_price),avg(order_item_product_price) from order_item;
+
+
+Exercise 2
+===========
+# Create  a table with following structure
+
+r_regionkey             int                                         
+r_name                  string                                      
+r_comment               string                                      
+r_nations               array<struct<n_nationkey:int,n_name:string,n_comment:string>>  
+
+# Load data into the table
+
+// sample data 
+1|AFRICA|Good Business Region for HadoopExam.com|0,Cameroon,Reference site http://www.QuickTechie.com
+1|AFRICA|Good Business Region for Training4Exam.com|5,Egypt,Reference site http://www.HadoopExam.com
+
+
+Solution
+--------
+
+create table region (
+r_regionkey             int                                         
+r_name                  string                                      
+r_comment               string                                      
+r_nations               array<struct<n_nationkey:int,n_name:string,n_comment:string>>  )
+row format delimited fields terminated by '|'
+collection items terminated by ','
+stored as textfile;
+
+LOAD DATA INPATH '/home/janagi212/region.csv' into table region;
+
+Exercise 3
+==========
+
+# Calcluate number of nationkeys,total of nationkeys,min/max of nationkeys, average of nationkeys
+
+select r_regionkey,count(n_nationkey),sum(n_nationkey),min(n_nationkey),max(n_nationkey),avg(n_nationkey) from region
+LATERAL VIEW EXPLODE(r_nations.N_NATIONKEY) key as n_nationkey
+group by r_regionkey;
+
+Exercise 4
+==========
+
+Create table with following fields and insert value and property as odd/even
+sample(x,property)
+
+Create table sample(x int,property string);
+insert into table sample values(1,'odd'),(2,'even'),(3,'odd'),(4,'even'),(5,'odd'),(6,'even'),(7,'odd'),(8,'even'),(9,'odd'),(10,'even');
+
+Exercise 5
+==========
+For the above table
+# Calculate Cumulative average for each Property
+# Calculate cumulative average for each property considering all preceding rows and current rows
+# Calculate moving average of 3 rows(1 preceding,1following and current row)
+
+Solution
+--------
+select avg(x) over (partition by property ) from sample;
+select avg(x) over (partition by property rows between unbounded preceding and current row) from sample;
+select avg(x) over (partition by property rows between 1 preceding and 1 following) from sample_exam;
+
+

@@ -1,7 +1,73 @@
 1. Change one file format to another in hive
-    
-Load avro file with avro schema to hive table
-Load Json file to hive table
-Create Partition - Static Partition/Dynamic Partition
-Bucketing
-Compression of data
+   Change order table which is stored in text file format to avro file format
+   
+   Describe orders;
+    OK
+order_id                int                                         
+order_date              string                                      
+order_customer_id       int                                         
+order_status            string                                      
+Time taken: 1.079 seconds, Fetched: 4 row(s)
+
+Solution
+-------
+Create table orders_avro
+stored as avro
+as
+Select * from orders;
+
+2. Load avro file with avro schema to hive table
+Below is the schema for categories.avsc table
+{
+  "type" : "record",
+  "name" : "categories",
+  "doc" : "Sqoop import of categories",
+  "fields" : [ {
+    "name" : "category_id",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "category_id",
+    "sqlType" : "4"
+  }, {
+    "name" : "category_department_id",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "category_department_id",
+    "sqlType" : "4"
+  }, {
+    "name" : "category_name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "category_name",
+    "sqlType" : "12"
+  } ],
+  "tableName" : "categories"
+}
+
+solution
+---------
+create table categories
+stored as avro
+location '/user/janagi212/categories'
+tblproperties ('avro.schema.literal'='/user/janagi212/categories.avsc')
+
+
+
+3. Load Json file to hive table
+Below is the sample.json file 
+{"sourceFiles": [{"compressType": "","ingestMetadata": "xxxxxxxxxxxxxx.xml","fileCompressed": "n"},{"compressType": "","ingestMetadata": "xxxxxxxxxxxxxx.xml","fileCompressed": "n"}]}
+
+solution
+--------
+Create table sample_json
+( 
+  sourcefiles array<struct<compressType:string,ingestMetadata:string,fileCompressed:string>>
+)
+location '/user/janagi212/sample_json'
+  
+
+4. Create Partition - Static Partition/Dynamic Partition
+
+5. Bucketing
+
+6. Compression of data

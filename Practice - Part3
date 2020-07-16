@@ -1,0 +1,7 @@
+1. Change one file format to another in hive
+    
+Load avro file with avro schema to hive table
+Load Json file to hive table
+Create Partition - Static Partition/Dynamic Partition
+Bucketing
+Compression of data

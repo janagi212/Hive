@@ -45,7 +45,7 @@ row format delimited fields terminated by '|'
 collection items terminated by ','
 stored as textfile;
 
-LOAD DATA INPATH '/home/janagi212/region.csv' into table region;
+LOAD DATA  LOCAL INPATH '/home/janagi212/region.csv' into table region;
 
 Exercise 3
 ==========
@@ -58,16 +58,17 @@ group by r_regionkey;
 
 Exercise 4
 ==========
-
-Create table with following fields and insert value and property as odd/even
+In Jan212_db database Create table with following fields and insert value and property as odd/even
 sample(x,property)
 
+create database Jan212_db;
+use Jan212_db;
 Create table sample(x int,property string);
 insert into table sample values(1,'odd'),(2,'even'),(3,'odd'),(4,'even'),(5,'odd'),(6,'even'),(7,'odd'),(8,'even'),(9,'odd'),(10,'even');
 
 Exercise 5
 ==========
-For the above table
+For the above table in the Jan_db database :
 # Calculate Cumulative average for each Property
 # Calculate cumulative average for each property considering all preceding rows and current rows
 # Calculate moving average of 3 rows(1 preceding,1following and current row)

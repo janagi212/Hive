@@ -49,12 +49,13 @@ solution
 create table categories
 stored as avro
 location '/user/janagi212/categories'
-tblproperties ('avro.schema.literal'='/user/janagi212/categories.avsc')
+tblproperties ('avro.schema.literal'='/user/janagi212/categories.avsc');
 
 
 
 3. Load Json file to hive table
-Below is the sample.json file 
+   Below is the sample.json file 
+   
 {"sourceFiles": [{"compressType": "","ingestMetadata": "xxxxxxxxxxxxxx.xml","fileCompressed": "n"},{"compressType": "","ingestMetadata": "xxxxxxxxxxxxxx.xml","fileCompressed": "n"}]}
 
 solution
@@ -63,11 +64,105 @@ Create table sample_json
 ( 
   sourcefiles array<struct<compressType:string,ingestMetadata:string,fileCompressed:string>>
 )
-location '/user/janagi212/sample_json'
+location '/user/janagi212/sample_json';
   
 
 4. Create Partition - Static Partition/Dynamic Partition
 
+# Create a partitioned table for NYSE_DATA and load the prepartitioned data into the table for static partition
+ 
+create table nyse_stock(
+stockticker string,
+tradedate int,
+openprice float,
+highprice float,
+lowprice float,
+closeprice float,
+volume bigint) 
+partitioned by (year int) 
+row format delimited fields terminated by ','
+stored as textfile;
+
+ // Load Pre-Partitioned data into partitioned table for static partition
+ 
+ load data inpath '/user/janagi212/nyse_data/nyse_data/NYSE_1997.txt' into table nyse_stock partition(year=1997);
+ load data inpath '/user/janagi212/nyse_data/nyse_data/NYSE_1998.txt' into table nyse_stock partition(year=1998);
+ load data inpath '/user/janagi212/nyse_data/nyse_data/NYSE_1999.txt' into table nyse_stock partition(year=1999);
+ load data inpath '/user/janagi212/nyse_data/nyse_data/NYSE_2000.txt' into table nyse_stock partition(year=2000);
+ load data inpath '/user/janagi212/nyse_data/nyse_data/NYSE_2001.txt' into table nyse_stock partition(year=2001);
+ load data inpath '/user/janagi212/nyse_data/nyse_data/NYSE_2002.txt' into table nyse_stock partition(year=2002);
+ 
+ # Create a partitioned table for NYSE_DATA and load the table using dynamic partition
+ 
+create table nyse_stock_dy(
+stockticker string,
+tradedate int,
+openprice float,
+highprice float,
+lowprice float,
+closeprice float,
+volume bigint) 
+partitioned by (year int)
+row format delimited fields terminated by  ','
+stored as textfile;
+                
+// Set the hive properties to enable dynamic partition
+
+SET hive.exec.dynamic.partition = true;
+SET hive.exec.dynamic.partition.mode = nonstrict;
+ 
+// Use Insert statement to load data into partition table
+
+insert into table nyse_stock_dy partition(year)                
+select stockticker,tradedate,openprice,highprice,lowprice,closeprice,vloume,substr(tradedate,0,4) from nyse_stock_dynamic;
+ 
+   
 5. Bucketing
 
+# Create table for NYSE_DATA clustered by tradedate 
+
+create table nyse_cluster (
+stockticker string,
+tradedate int,
+openprice float,
+highprice float,
+lowprice float,
+closeprice float,
+volume bigint)
+clustered by (tradedate) into 12 buckets
+stored as orc;
+
+// Set properties to enable bucketing
+
+set hive.enforce.bucketing = true;
+
+//Use Insert statement to load data
+
+insert into nyse_cluster
+select stockticker,tradedate,openprice,highprice,lowprice,closeprice from nyse_stock_dynamic ;
+
 6. Compression of data
+# Show how data can be compressed in hive table
+
+//Set below properties to enable compression
+
+SET hive.exec.compress.output=true;
+SET mapreduce.output.fileoutputformat.compress=true;
+SET mapreduce.output.fileoutputformat.compress.codec;
+mapreduce.output.fileoutputformat.compress.codec=org.apache.hadoop.io.compress.DefaultCodec
+SET mapreduce.output.fileoutputformat.compress.codec=org.apache.hadoop.io.compress.GzipCodec;
+
+// Create table and laod data 
+create table nyse_compress 
+as
+select * from nyse_stock_dynamic;
+
+//Check data is compressed
+describe formatted nyse_compress;
+dfs -ls hdfs://nn01.itversity.com:8020/apps/hive/warehouse/jan212_db.db/nyse_compress;
+
+-rwxrwxrwx   2 janagi212 hdfs   94810913 2020-07-27 22:12 hdfs://nn01.itversity.com:8020/apps/hive/warehouse/jan212_db.db/nyse_compress/000000_0.gz
+-rwxrwxrwx   2 janagi212 hdfs   24607326 2020-07-27 22:12 hdfs://nn01.itversity.com:8020/apps/hive/warehouse/jan212_db.db/nyse_compress/000001_0.gz
+-rwxrwxrwx   2 janagi212 hdfs   19768158 2020-07-27 22:12 hdfs://nn01.itversity.com:8020/apps/hive/warehouse/jan212_db.db/nyse_compress/000002_0.gz
+
+
